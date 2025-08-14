@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            box-sizing: border-box;
+        }
+        body {
+            background: #e4dfdf;
+            transition: background 0.5s ease;
+            perspective: 1000px;
+        }
+        .card {
+            width: 90%;
+            max-width: 470px;
+            background: linear-gradient(135deg, #00feba, #5b548a);
+            color: #fff;
+            margin: 100px auto 0;
+            border-radius: 20px;
+            padding: 40px 35px;
+            text-align: center;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+        .card:hover {
+            transform: rotateY(15deg) rotateX(10deg);
+        }
+        .search {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .search input {
+            border: 0;
+            outline: 0;
+            background: #000306;
+            color: #fffffc;
+            padding: 10px 25px;
+            height: 60px;
+            border-radius: 30px;
+            flex: 1;
+            margin-right: 16px;
+            font-size: 18px;
+        }
+        .search button {
+            border: 0;
+            outline: 0;
+            background: #ebfffc;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+        }
+        .search button img {
+            width: 16px;
+        }
+        .weather-icon {
+            width: 170px;
+            margin-top: 30px;
+        }
+        .weather h1 {
+            font-size: 80px;
+            font-weight: 500;
+        }
+        .weather h2 {
+            font-size: 45px;
+            font-weight: 400;
+            margin-top: -10px;
+        }
+        .details {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body id="weather-app">
+    <div class="card">
+        <div class="search">
+            <input type="text" placeholder="Enter city name" spellcheck="false">
+            <button><img src="https://static.thenounproject.com/png/2729269-200.png" alt="Search icon"></button>
+        </div>
+        <div class="weather">
+            <img src="https://cdn-icons-png.flaticon.com/128/1163/1163661.png" class="weather-icon" alt="Weather icon">
+            <h1 class="temp">°C</h1>
+            <h2 class="city"></h2>
+            <div class="details">
+                <div class="col">
+                    <img src="https://cdn-icons-png.flaticon.com/128/727/727790.png" height="76" alt="Humidity icon">
+                    <div>
+                        <p class="humidity">%</p>
+                        <p>Humidity</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRoxlSUlEj87SPLoZSzO16qH2WlQAQxUJ-yKg&s" height="76" alt="Wind speed icon">
+                    <div>
+                        <p class="Wind"> km/h</p>
+                        <p>Wind speed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const searchButton = document.querySelector('button');
+        const cityInput = document.querySelector('input');
+        const weatherCard = document.querySelector('.card');
+        const temperatureElement = document.querySelector('.temp');
+        const cityElement = document.querySelector('.city');
+        const humidityElement = document.querySelector('.humidity');
+        const windElement = document.querySelector('.Wind');
+        const body = document.body;
+
+        const apiKey = "dff120b7911e9421aab360d50d3175bc";
+
+        searchButton.addEventListener('click', () => {
+            const city = cityInput.value.trim();
+            if (city) {
+                getWeather(city);
+            }
+        });
+
+        async function getWeather(city) {
+            const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.cod === 200) {
+                    const temp = data.main.temp;
+                    const humidity = data.main.humidity;
+                    const windSpeed = data.wind.speed;
+                    const weatherCondition = data.weather[0].main.toLowerCase();
+
+                    temperatureElement.textContent = `${temp}°C`;
+                    cityElement.textContent = data.name;
+                    humidityElement.textContent = `${humidity}%`;
+                    windElement.textContent = `${windSpeed} km/h`;
+
+                    
+                    if (temp < 10) {
+                        body.style.background = "#1e3c72"; 
+                    } else if (temp >= 10 && temp <= 25) {
+                        body.style.background = "#0a9d84";  
+                    } else {
+                        body.style.background = "#f56d6d"; 
+                    }
+
+                    weatherCard.style.transform = `rotateY(15deg) rotateX(10deg)`;
+
+                  
+                    const weatherIcon = document.querySelector('.weather-icon');
+                    if (weatherCondition === 'clear') {
+                        weatherIcon.src = "https://cdn-icons-png.flaticon.com/128/1163/1163661.png";  
+                    } else if (weatherCondition === 'clouds') {
+                        weatherIcon.src = "https://cdn-icons-png.flaticon.com/128/1163/1163662.png";  
+                    } else if (weatherCondition === 'rain') {
+                        weatherIcon.src = "https://cdn-icons-png.flaticon.com/128/1163/1163663.png";  
+                    } else {
+                        weatherIcon.src = "https://cdn-icons-png.flaticon.com/128/1163/1163661.png";  
+                    }
+                } else {
+                    alert("City not found. Please try again.");
+                }
+            } catch (error) {
+                alert("Error fetching weather data.");
+            }
+        }
+    </script>
+</body>
+</html>
